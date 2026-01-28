@@ -6,8 +6,10 @@ import {
   type EntitySectionRef,
 } from "./components/EntitySection";
 import { WeightSummary } from "./components/WeightSummary";
-import { Input } from "./components/ui/input";
 import { Card } from "./components/ui/card";
+import { Kbd } from "./components/ui/kbd";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Search01Icon } from "@hugeicons/core-free-icons";
 import type {
   EntityData,
   RecentActivityItem,
@@ -165,10 +167,10 @@ function App() {
 
       {/* Main content area */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-6 pt-6 pb-4">
           <div className="flex items-start gap-6">
             {/* Center: Dashboard Card */}
-            <Card className="flex-1 shadow-sm">
+            <Card className="flex-1 shadow-sm pb-2">
               {/* Entity sections with integrated step icons */}
               <div>
                 {mockEntities.map((entity, index) => (
@@ -191,13 +193,57 @@ function App() {
               </div>
 
               {/* Keyboard navigation hint */}
-              <div className="px-6 py-3 bg-muted/50">
-                <Input
-                  type="text"
-                  placeholder="Search • Tab next • Enter select • Esc close"
-                  className="bg-background border-border text-muted-foreground placeholder:text-muted-foreground"
-                  readOnly
-                />
+              <div
+                className="px-6 py-3 bg-muted/30 border-t border-b border-border"
+                role="region"
+                aria-label="Keyboard shortcuts information"
+              >
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="flex items-center gap-1.5">
+                      <HugeiconsIcon
+                        icon={Search01Icon}
+                        size={14}
+                        color="currentColor"
+                        strokeWidth={1.5}
+                        className="shrink-0"
+                        aria-hidden="true"
+                      />
+                      <Kbd>Q</Kbd>
+                      <span>Search</span>
+                    </span>
+                    <span
+                      className="text-muted-foreground/60"
+                      aria-hidden="true"
+                    >
+                      •
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Kbd>Tab</Kbd>
+                      <span>next</span>
+                    </span>
+                    <span
+                      className="text-muted-foreground/60"
+                      aria-hidden="true"
+                    >
+                      •
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Kbd>Enter</Kbd>
+                      <span>select</span>
+                    </span>
+                    <span
+                      className="text-muted-foreground/60"
+                      aria-hidden="true"
+                    >
+                      •
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Kbd>Esc</Kbd>
+                      <span>close</span>
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Weight summary */}

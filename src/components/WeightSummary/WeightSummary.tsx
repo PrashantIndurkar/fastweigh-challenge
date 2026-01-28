@@ -29,9 +29,7 @@ export function WeightSummary({ data, onPrintTicket }: WeightSummaryProps) {
   };
 
   return (
-    <div className="px-6 py-4">
-      <Separator className="mb-4" />
-
+    <div className="px-6 pt-4 pb-3">
       <div className="flex items-center justify-between gap-6">
         {/* Left side: Scale status and weight breakdown */}
         <div className="flex-1 space-y-4">
