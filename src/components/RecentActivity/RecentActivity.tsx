@@ -52,7 +52,6 @@ export const RecentActivity = forwardRef<
   const listRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const hasItems = items.length > 0;
-  const isListFocused = focusedIndex !== null;
 
   // Expose focus and close methods to parent component
   useImperativeHandle(ref, () => ({

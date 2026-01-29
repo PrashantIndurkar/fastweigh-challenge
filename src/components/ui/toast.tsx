@@ -23,7 +23,7 @@ export interface ToastProps {
 
 const Toast = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & ToastProps
+  Omit<React.HTMLAttributes<HTMLDivElement>, "title"> & ToastProps
 >(
   (
     {

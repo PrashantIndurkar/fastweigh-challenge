@@ -567,16 +567,71 @@ function App() {
     });
   };
 
+  // Validate print conditions and return specific error message if validation fails
+  const validatePrintConditions = ():
+    | { isValid: true }
+    | { isValid: false; error: string } => {
+    // Check scale status first (most critical)
+    if (scaleStatus !== "STABLE") {
+      return {
+        isValid: false,
+        error: "Scale is unstable - wait for STABLE status before printing",
+      };
+    }
+
+    // Check net weight
+    if (netLbs <= 0) {
+      return {
+        isValid: false,
+        error:
+          "Net weight is zero - ensure gross weight is greater than tare weight",
+      };
+    }
+
+    // Check required entity selections (in order of workflow)
+    if (!selectedTruckId) {
+      return {
+        isValid: false,
+        error: "Truck must be selected",
+      };
+    }
+
+    if (!selectedCustomerId) {
+      return {
+        isValid: false,
+        error: "Customer must be selected",
+      };
+    }
+
+    if (!selectedOrderId) {
+      return {
+        isValid: false,
+        error: "Order must be selected",
+      };
+    }
+
+    if (!selectedProductId) {
+      return {
+        isValid: false,
+        error: "Product must be selected",
+      };
+    }
+
+    // All conditions met
+    return { isValid: true };
+  };
+
   const handlePrintTicket = () => {
     console.log("Print ticket clicked");
 
-    // Validate before proceeding
-    if (!isPrintEnabled) {
-      console.warn("Print validation failed - cannot print ticket");
+    // Validate before proceeding with specific error messages
+    const validation = validatePrintConditions();
+    if (!validation.isValid) {
+      console.warn("Print validation failed:", validation.error);
       toast({
         variant: "destructive",
         title: "Cannot print ticket",
-        description: "Please complete all required fields before printing",
+        description: validation.error,
       });
       return;
     }

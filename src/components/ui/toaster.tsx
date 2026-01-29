@@ -21,9 +21,31 @@ export function Toaster() {
       aria-live="polite"
       aria-atomic="true"
     >
-      {toasts.map((toast) => (
-        <Toast key={toast.id} {...toast} open={toast.open} />
-      ))}
+      {toasts.map((toast) => {
+        const {
+          id,
+          title,
+          description,
+          action,
+          variant,
+          duration,
+          open,
+          onOpenChange,
+        } = toast;
+        return (
+          <Toast
+            key={id}
+            id={id}
+            title={title}
+            description={description}
+            action={action}
+            variant={variant}
+            duration={duration}
+            open={open}
+            onOpenChange={onOpenChange}
+          />
+        );
+      })}
     </div>
   );
 
