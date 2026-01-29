@@ -1,2 +1,2 @@
-export { RecentActivity } from "./RecentActivity";
+export { RecentActivity, type RecentActivityRef } from "./RecentActivity";
 export { RecentActivityItem } from "./RecentActivityItem";

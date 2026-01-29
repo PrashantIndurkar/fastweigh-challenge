@@ -1,4 +1,3 @@
-// import { Printer01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
@@ -9,120 +8,173 @@ import { PrinterIcon } from "@hugeicons/core-free-icons";
 interface WeightSummaryProps {
   data: WeightSummaryData;
   onPrintTicket?: () => void;
+  isPrintDisabled?: boolean;
+  hasTruckSelected?: boolean;
 }
 
 /**
  * Weight summary component displaying scale status, weight calculations, and pricing
  * Located at the bottom of the dashboard card
  */
-export function WeightSummary({ data, onPrintTicket }: WeightSummaryProps) {
-  // Determine scale status badge styling based on status
+export function WeightSummary({
+  data,
+  onPrintTicket,
+  isPrintDisabled = false,
+  hasTruckSelected = false,
+}: WeightSummaryProps) {
+  // Normalize scale status to ensure it's "STABLE" or "READING"
+  const scaleStatus = (
+    data.scaleStatus.toUpperCase() === "READING" ? "READING" : "STABLE"
+  ) as "STABLE" | "READING";
+
+  // Determine scale status badge styling based on status with dark mode support
   const getScaleStatusStyles = (status: string) => {
     const normalizedStatus = status.toUpperCase();
     if (normalizedStatus === "STABLE") {
-      return "bg-green-50 text-green-700 border-green-200";
+      // Dark mode: darker green background with lighter green text for better contrast
+      return "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-700";
     } else if (normalizedStatus === "READING") {
-      return "bg-orange-50 text-orange-600 border-orange-200";
+      // Dark mode: darker orange background with lighter orange text for better contrast
+      return "bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-700";
     }
     // Default fallback for other states (could be red for unstable)
-    return "bg-red-50 text-red-600 border-red-200";
+    return "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-700";
   };
 
   return (
-    <div className="px-6 pt-4 pb-3">
-      <div className="flex items-center justify-between gap-6">
-        {/* Left side: Scale status and weight breakdown */}
-        <div className="flex-1 space-y-4">
-          {/* Scale status */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-muted-foreground uppercase">
-              Scale:
-            </span>
-            <Badge
-              variant="outline"
-              className={`rounded-none border px-2.5 py-0.5 text-xs font-semibold uppercase ${getScaleStatusStyles(
-                data.scaleStatus,
-              )}`}
-            >
-              {data.scaleStatus}
-            </Badge>
+    <div className="px-4 md:px-6 pt-3 md:pt-4 pb-3 md:pb-4">
+      {/* Top row: Scale status (left) and Price info (right) */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 lg:gap-6 mb-4 md:mb-6">
+        {/* Scale status - left side */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-muted-foreground uppercase whitespace-nowrap">
+            Scale:
+          </span>
+          <Badge
+            variant="outline"
+            className={`rounded-none border px-2.5 py-0.5 text-xs font-semibold uppercase whitespace-nowrap ${getScaleStatusStyles(
+              hasTruckSelected ? scaleStatus : "STABLE",
+            )}`}
+          >
+            {hasTruckSelected ? scaleStatus : "-"}
+          </Badge>
+        </div>
+
+        {/* Price info - right side */}
+        <div className="text-left sm:text-right shrink-0 min-w-0">
+          <div className="text-xs text-muted-foreground mb-1 whitespace-nowrap">
+            {data.pricePerTon > 0 ? (
+              `@ $${data.pricePerTon.toFixed(2)}/ton`
+            ) : (
+              <span className="text-muted-foreground">@ -/ton</span>
+            )}
           </div>
+          <div
+            className={`text-xl sm:text-2xl lg:text-3xl font-bold whitespace-nowrap ${
+              data.pricePerTon > 0
+                ? data.totalPrice > 0
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-red-600 dark:text-red-400"
+                : "text-muted-foreground"
+            }`}
+          >
+            {data.pricePerTon > 0 ? (
+              `$${data.totalPrice.toFixed(2)}`
+            ) : (
+              <span className="text-muted-foreground">-</span>
+            )}
+          </div>
+        </div>
+      </div>
 
-          {/* Weight breakdown: LBS and TONS side by side */}
-          <div className="flex items-center gap-6">
-            {/* Weight in LBS */}
-            <div className="flex-1">
-              <div className="text-xs text-muted-foreground uppercase mb-2 text-center font-semibold">
-                LBS
-              </div>
-              <div className="flex items-center justify-center gap-2.5 text-xs">
-                <span className="text-muted-foreground uppercase">GROSS</span>
-                <span className="text-foreground font-semibold text-sm">
-                  {data.weightLbs.gross.toLocaleString()}
-                </span>
-                <span className="text-muted-foreground text-base font-medium">
-                  -
-                </span>
-                <span className="text-muted-foreground uppercase">TARE</span>
-                <span className="text-foreground font-semibold text-sm">
-                  {data.weightLbs.tare.toLocaleString()}
-                </span>
-                <span className="text-muted-foreground text-base font-medium">
-                  =
-                </span>
-                <span className="text-muted-foreground uppercase">NET</span>
-                <span className="text-green-600 font-semibold text-sm">
-                  {data.weightLbs.net.toLocaleString()}
-                </span>
-              </div>
+      {/* Bottom row: LBS | TONS | Print button */}
+      <div className="flex flex-col lg:flex-row items-center gap-3 sm:gap-4 lg:gap-4 xl:gap-6 w-full">
+        {/* Weight in LBS - titles above, values below with proper alignment */}
+        <div className="flex-1 w-full lg:w-auto min-w-0 max-w-full">
+          <div className="flex flex-col items-center gap-2">
+            {/* Titles row */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 text-xs text-muted-foreground uppercase font-semibold">
+              <span className="min-w-[50px] sm:min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-right">
+                GROSS
+              </span>
+              <span className="text-muted-foreground">-</span>
+              <span className="min-w-[50px] sm:min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-left">
+                TARE
+              </span>
+              <span className="text-muted-foreground mx-0.5 sm:mx-1">=</span>
+              <span className="min-w-[50px] sm:min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-left">
+                NET
+              </span>
             </div>
-
-            {/* Vertical separator */}
-            <Separator orientation="vertical" className="h-8" />
-
-            {/* Weight in TONS */}
-            <div className="flex-1">
-              <div className="text-xs text-muted-foreground uppercase mb-2 text-center font-semibold">
-                TONS
-              </div>
-              <div className="flex items-center justify-center gap-2.5 text-xs">
-                <span className="text-muted-foreground uppercase">GROSS</span>
-                <span className="text-foreground font-semibold text-sm">
-                  {data.weightTons.gross.toFixed(2)}
-                </span>
-                <span className="text-muted-foreground text-base font-medium">
-                  -
-                </span>
-                <span className="text-muted-foreground uppercase">TARE</span>
-                <span className="text-foreground font-semibold text-sm">
-                  {data.weightTons.tare.toFixed(2)}
-                </span>
-                <span className="text-muted-foreground text-base font-medium">
-                  =
-                </span>
-                <span className="text-muted-foreground uppercase">NET</span>
-                <span className="text-green-600 font-semibold text-sm">
-                  {data.weightTons.net.toFixed(2)}
-                </span>
-              </div>
+            {/* Values row */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 text-xs sm:text-sm">
+              <span className="text-foreground font-semibold min-w-[50px] sm:min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-right truncate">
+                {hasTruckSelected ? data.weightLbs.gross.toLocaleString() : "-"}
+              </span>
+              <span className="text-muted-foreground">-</span>
+              <span className="text-foreground font-semibold min-w-[50px] sm:min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-left truncate">
+                {hasTruckSelected ? data.weightLbs.tare.toLocaleString() : "-"}
+              </span>
+              <span className="text-muted-foreground text-sm sm:text-base font-medium mx-0.5 sm:mx-1">
+                =
+              </span>
+              <span className="text-green-600 font-semibold min-w-[50px] sm:min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-left truncate">
+                {hasTruckSelected ? data.weightLbs.net.toLocaleString() : "-"}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right side: Pricing and print button - aligned with weight values */}
-        <div className="flex flex-col items-end justify-center gap-2">
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground mb-1">
-              @ ${data.pricePerTon.toFixed(2)}/ton
+        {/* Horizontal separator on mobile/tablet, vertical on large desktop */}
+        <Separator orientation="horizontal" className="w-full lg:hidden my-2" />
+        <Separator orientation="vertical" className="h-12 hidden lg:block" />
+
+        {/* Weight in TONS - titles above, values below with proper alignment */}
+        <div className="flex-1 w-full lg:w-auto min-w-0 max-w-full">
+          <div className="flex flex-col items-center gap-2">
+            {/* Titles row */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 text-xs text-muted-foreground uppercase font-semibold">
+              <span className="min-w-[45px] sm:min-w-[50px] md:min-w-[55px] lg:min-w-[60px] text-right">
+                GROSS
+              </span>
+              <span className="text-muted-foreground">-</span>
+              <span className="min-w-[45px] sm:min-w-[50px] md:min-w-[55px] lg:min-w-[60px] text-left">
+                TARE
+              </span>
+              <span className="text-muted-foreground mx-0.5 sm:mx-1">=</span>
+              <span className="min-w-[45px] sm:min-w-[50px] md:min-w-[55px] lg:min-w-[60px] text-left">
+                NET
+              </span>
             </div>
-            <div className="text-2xl font-bold text-primary">
-              ${data.totalPrice.toFixed(2)}
+            {/* Values row */}
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 text-xs sm:text-sm">
+              <span className="text-foreground font-semibold min-w-[45px] sm:min-w-[50px] md:min-w-[55px] lg:min-w-[60px] text-right truncate">
+                {hasTruckSelected ? data.weightTons.gross.toFixed(2) : "-"}
+              </span>
+              <span className="text-muted-foreground">-</span>
+              <span className="text-foreground font-semibold min-w-[45px] sm:min-w-[50px] md:min-w-[55px] lg:min-w-[60px] text-left truncate">
+                {hasTruckSelected ? data.weightTons.tare.toFixed(2) : "-"}
+              </span>
+              <span className="text-muted-foreground text-sm sm:text-base font-medium mx-0.5 sm:mx-1">
+                =
+              </span>
+              <span className="text-green-600 font-semibold min-w-[45px] sm:min-w-[50px] md:min-w-[55px] lg:min-w-[60px] text-left truncate">
+                {hasTruckSelected ? data.weightTons.net.toFixed(2) : "-"}
+              </span>
             </div>
           </div>
+        </div>
+
+        {/* Horizontal separator before button on mobile/tablet */}
+        <Separator orientation="horizontal" className="w-full lg:hidden my-2" />
+
+        {/* Print button - full width on mobile/tablet, auto on large desktop */}
+        <div className="w-full lg:w-auto shrink-0 mt-2 lg:mt-0">
           <Button
             type="button"
             onClick={onPrintTicket}
-            className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+            disabled={isPrintDisabled}
+            className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 w-full lg:w-auto shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Print ticket"
           >
             <HugeiconsIcon
@@ -132,7 +184,9 @@ export function WeightSummary({ data, onPrintTicket }: WeightSummaryProps) {
               aria-hidden="true"
             />
             <span>Print Ticket</span>
-            <span className="text-sm ml-2 opacity-70">⌘ ⏎</span>
+            <span className="text-sm ml-2 opacity-70 hidden sm:inline">
+              ⌘ ⏎
+            </span>
           </Button>
         </div>
       </div>

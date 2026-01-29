@@ -49,8 +49,7 @@ export function Steps({
               className={`
                 flex items-center justify-center
                 w-10 h-10 rounded-full
-                transition-colors duration-200
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring
+                focus:outline-none
                 ${
                   isActive
                     ? "bg-foreground text-background"
